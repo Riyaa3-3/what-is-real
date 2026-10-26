@@ -1,6 +1,9 @@
 name: Deploy GitHub Pages
 
 on:
+  push:
+    branches:
+      - feat/immersive-narrative
   workflow_dispatch:
 
 permissions:
@@ -14,6 +17,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.ref == 'refs/heads/feat/immersive-narrative'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
