@@ -31,6 +31,24 @@ jobs:
         run: npm test
       - name: Build relative-path static site
         run: npm run build
+      - name: Checkout V2 separately for preview
+        uses: actions/checkout@v4
+        with:
+          ref: feat/chapter-motion-audio-v2
+          path: preview-source
+          persist-credentials: false
+      - name: Test and build V2 preview
+        working-directory: preview-source
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Preserve V1 at root and add V2 at /preview-v2/
+        run: |
+          mkdir -p dist/preview-v2
+          cp -a preview-source/dist/. dist/preview-v2/
+          test -s dist/index.html
+          test -s dist/preview-v2/index.html
       - name: Check existing Pages configuration
         uses: actions/configure-pages@v5
         with:
