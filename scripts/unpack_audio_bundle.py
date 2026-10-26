@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Unpack the nine owner-approved MP3s from a single uploaded GitHub ZIP.
+"""Unpack the nine owner-approved MP3s from the original user audio pack or ZIP.
 
 The audio is copied only into known public/audio paths. Hash checks make it
 impossible for an arbitrary ZIP to inject extra files into the site build.
 """
 import hashlib
+import json
+import struct
 from pathlib import Path
 from zipfile import ZipFile, BadZipFile
 
 BUNDLE = Path("WHAT_IS_REAL_V2_audio_for_GitHub.zip")
+LOCAL_PACK = Path("WHAT_IS_REAL_audio_pack.wiraudio")
 APPROVED_SHA256 = {
     "public/audio/background/atmosphere-loop.mp3": "27c5fa1fcfdde176b70b654eaca4ea9665f61e1a97100fca53243dd0d0d4aa1a",
     "public/audio/baseline/cells-01-institution.mp3": "8fe89102c1d0ba3702b608cb17f7c8c241e7fea2125b47bb01548ffa12692260",
@@ -23,37 +26,81 @@ APPROVED_SHA256 = {
 OPTIONAL_METADATA = "public/audio/TRACK_MANIFEST.json"
 
 
-def prepare() -> None:
-    if not BUNDLE.is_file():
-        print("No approved audio ZIP uploaded yet. Build remains playable with the browser-local audio pack.")
-        return
+def read_zip() -> dict[str, bytes]:
     if BUNDLE.stat().st_size > 12_000_000:
         raise ValueError("Unexpected audio ZIP size; release cancelled.")
     try:
         with ZipFile(BUNDLE) as archive:
-            files = archive.namelist()
-            if len(files) != len(set(files)):
-                raise ValueError("Audio bundle contains duplicate entries.")
-            present = set(files)
-            if present - {OPTIONAL_METADATA} != set(APPROVED_SHA256):
-                raise ValueError("Audio ZIP does not contain exactly the nine approved MP3 files.")
-            validated = {}
-            for path, digest in APPROVED_SHA256.items():
-                info = archive.getinfo(path)
-                if not 1000 < info.file_size < 8_000_000:
-                    raise ValueError(f"Unexpected audio size: {path}")
-                content = archive.read(path)
-                if hashlib.sha256(content).hexdigest() != digest:
-                    raise ValueError(f"Audio differs from the approved file: {path}")
-                validated[path] = content
+            names = archive.namelist()
+            if len(names) != len(set(names)):
+                raise ValueError("Audio ZIP contains duplicate entries.")
+            if set(names) - {OPTIONAL_METADATA} != set(APPROVED_SHA256):
+                raise ValueError("ZIP must contain exactly the nine approved MP3 paths.")
+            return {name: archive.read(name) for name in APPROVED_SHA256}
     except BadZipFile as exc:
         raise ValueError("The uploaded soundtrack is not a valid ZIP file.") from exc
+
+
+def read_local_pack() -> dict[str, bytes]:
+    # The exact, previously confirmed 4.1MB WHAT_IS_REAL_audio_pack.wiraudio
+    # already present on the user's computer is accepted without re-downloading.
+    if not 100_000 < LOCAL_PACK.stat().st_size < 12_000_000:
+        raise ValueError("Unexpected .wiraudio pack size.")
+    blob = LOCAL_PACK.read_bytes()
+    length = struct.unpack_from("<I", blob)[0]
+    if not 40 < length < 15_000 or length + 4 >= len(blob):
+        raise ValueError("Invalid audio pack header.")
+    try:
+        manifest = json.loads(blob[4 : 4 + length])
+    except (ValueError, UnicodeDecodeError) as exc:
+        raise ValueError("Audio pack manifest is unreadable.") from exc
+    if manifest.get("magic") != "WHAT_IS_REAL_AUDIO_PACK_V1":
+        raise ValueError("Invalid WHAT IS REAL audio pack format.")
+    entries = manifest.get("files")
+    if not isinstance(entries, list) or len(entries) != 9:
+        raise ValueError("Audio pack must contain precisely nine tracks.")
+    result = {}
+    for entry in entries:
+        if not isinstance(entry, dict) or not isinstance(entry.get("key"), str):
+            raise ValueError("Invalid audio pack entry.")
+        path = "public/audio/" + entry["key"]
+        if path not in APPROVED_SHA256 or path in result:
+            raise ValueError("Unexpected or duplicate audio file key.")
+        offset, length = entry.get("offset"), entry.get("length")
+        if type(offset) is not int or type(length) is not int or offset < 0 or length <= 0:
+            raise ValueError("Invalid audio pack offset or length.")
+        # Use the original encoded manifest length, never a reserialized size.
+        start = 4 + struct.unpack_from("<I", blob)[0] + offset
+        if start + length > len(blob):
+            raise ValueError("Audio pack references data outside its payload.")
+        result[path] = blob[start : start + length]
+    if set(result) != set(APPROVED_SHA256):
+        raise ValueError("Audio pack is incomplete.")
+    return result
+
+
+def prepare() -> None:
+    if BUNDLE.is_file():
+        validated = read_zip()
+        print("Using approved ZIP soundtrack bundle.")
+    elif LOCAL_PACK.is_file():
+        validated = read_local_pack()
+        print("Using original WHAT IS REAL audio pack; no ChatGPT ZIP download needed.")
+    else:
+        print("No soundtrack bundle uploaded yet. Website still supports local audio import.")
+        return
+    for path, expected_hash in APPROVED_SHA256.items():
+        content = validated[path]
+        if not 1000 < len(content) < 8_000_000:
+            raise ValueError(f"Unexpected audio file size: {path}")
+        if hashlib.sha256(content).hexdigest() != expected_hash:
+            raise ValueError(f"Audio differs from the approved recording: {path}")
     for path, content in validated.items():
         destination = Path(path)
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(content)
         print(f"Verified and installed {destination}: {len(content)} bytes")
-    print("All 9 approved soundtracks installed for this production build.")
+    print("All nine approved audio tracks installed for this website build.")
 
 
 if __name__ == "__main__":
