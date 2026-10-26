@@ -34,7 +34,7 @@ export function useExperienceAudio(screenId: string, questionIndex: number) {
       if (background.current !== player) return;
       if (reason instanceof DOMException && reason.name === 'NotAllowedError') {
         setMusicStatus('awaiting-gesture');
-      } else if (player.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED) {
+      } else if (player.error?.code === 4) {
         setMusicStatus('error');
       } else {
         setMusicStatus('awaiting-gesture');
