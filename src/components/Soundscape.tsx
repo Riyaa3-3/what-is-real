@@ -8,8 +8,9 @@ import './soundscape.css';
  * No user upload, browser-local audio pack or IndexedDB is needed.
  */
 function hostedAudioUrl(key: string): string {
-  const appRoot = new URL(import.meta.env.BASE_URL, document.baseURI);
-  return resolveHostedAudioUrl(key, appRoot.href);
+  // On iOS Quark the native URL constructor may throw during initialization.
+  // The HTML document and Vite assets share the same published directory.
+  return resolveHostedAudioUrl(key, window.location.pathname);
 }
 
 type AudioStatus = 'loading' | 'playing' | 'awaiting-gesture' | 'error' | 'off';

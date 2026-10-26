@@ -14,8 +14,17 @@ function useMotionPreference() {
   useEffect(() => {
     const query = window.matchMedia('(prefers-reduced-motion: reduce)');
     const change = () => setSystem(query.matches);
-    query.addEventListener('change', change);
-    return () => query.removeEventListener('change', change);
+    // Legacy iOS WebKit (including embedded browsers) may only implement
+    // MediaQueryList.addListener/removeListener, not EventTarget methods.
+    if (typeof query.addEventListener === 'function') {
+      query.addEventListener('change', change);
+      return () => query.removeEventListener('change', change);
+    }
+    if (typeof query.addListener === 'function') {
+      query.addListener(change);
+      return () => query.removeListener(change);
+    }
+    return undefined;
   }, []);
   return {
     reduced: system || manual,

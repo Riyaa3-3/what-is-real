@@ -55,6 +55,13 @@ html,body{margin:0;min-height:100%;background:#edf4f7!important;color:#102536!im
  report('User Agent: '+navigator.userAgent);
  report('screen: '+screen.width+' x '+screen.height+' / DPR: '+window.devicePixelRatio);
  report('matchMedia: '+(typeof window.matchMedia));
+ if (typeof window.matchMedia === 'function') {
+   var mql=window.matchMedia('(prefers-reduced-motion: reduce)');
+   report('MediaQueryList.addEventListener: '+typeof mql.addEventListener);
+   report('MediaQueryList.addListener: '+typeof mql.addListener);
+ }
+ try { report('native URL constructor: '+new URL('./assets/',document.baseURI).href); }
+ catch(err) { report('native URL constructor FAILED: '+(err&&err.message||String(err))); }
  report('requestAnimationFrame: '+(typeof window.requestAnimationFrame));
  report('CSS overflow clip supported: '+(window.CSS&&CSS.supports?CSS.supports('overflow','clip'):'unknown'));
  document.getElementById('run-test').addEventListener('click',async function(){
@@ -71,25 +78,43 @@ html,body{margin:0;min-height:100%;background:#edf4f7!important;color:#102536!im
    var moduleScript=doc.querySelector('script[type="module"][src]');
    var styleLink=doc.querySelector('link[rel="stylesheet"][href]');
    if(!moduleScript)throw Error('No module script in production HTML');
-   var moduleURL=new URL(moduleScript.getAttribute('src'),response.url).href;
-   report('JS bundle path: '+moduleURL);
+   // The diagnostic page and homepage share a folder. An <a> element can
+   // resolve relative asset paths even where the native URL constructor fails.
+   var rawScriptPath=moduleScript.getAttribute('src');
+   var scriptLink=document.createElement('a');
+   scriptLink.href=rawScriptPath;
+   var moduleURL=scriptLink.href;
+   report('JS script attribute: '+rawScriptPath);
+   report('JS bundle path (anchor): '+moduleURL);
+   report('Response URL: '+(response.url||'(empty)'));
    var probe=await fetch(moduleURL,{method:'GET',cache:'no-store'});
    report('JS bundle HTTP: '+probe.status+' / MIME: '+probe.headers.get('content-type'));
    if(!probe.ok)throw Error('Main JS bundle HTTP '+probe.status);
    if(styleLink){
      var style=document.createElement('link');
-     style.rel='stylesheet';style.href=new URL(styleLink.getAttribute('href'),response.url).href;
+     var cssLink=document.createElement('a');
+     cssLink.href=styleLink.getAttribute('href');
+     style.rel='stylesheet';style.href=cssLink.href;
      document.head.appendChild(style);
-     report('Site CSS attached');
+     report('Site CSS attached: '+style.href);
    }
    var script=document.createElement('script');
    script.type='module';script.src=moduleURL;
-   script.onerror=function(){report('ERROR: Main module failed to load or parse');status.textContent='④ 主网站程序：加载失败（截图错误日志）';status.className='result bad';};
+   script.onerror=function(event){report('ERROR: Main module failed to load or parse at '+(event&&event.target&&event.target.src||moduleURL));status.textContent='④ 主网站程序：加载失败（截图错误日志）';status.className='result bad';};
    script.onload=function(){
      report('Main module network load event received.');
      setTimeout(function(){
-       var count=document.getElementById('root').childElementCount;
+       var root=document.getElementById('root');
+       var count=root.childElementCount;
+       var experience=root.querySelector('.experience');
+       var header=root.querySelector('.site-header');
        report('React #root childElementCount: '+count);
+       report('Experience node: '+!!experience+'; header node: '+!!header);
+       if(experience){
+         var styleInfo=getComputedStyle(experience);
+         report('Experience display / visibility / opacity: '+styleInfo.display+' / '+styleInfo.visibility+' / '+styleInfo.opacity);
+         report('Experience bounds: '+Math.round(experience.getBoundingClientRect().width)+' x '+Math.round(experience.getBoundingClientRect().height));
+       }
        if(count){
          status.textContent='④ React 主程序：已创建页面节点。如果原站仍黑屏，更可能是视觉图层渲染问题。';
          status.className='result good';
