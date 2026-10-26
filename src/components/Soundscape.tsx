@@ -10,7 +10,7 @@ import './soundscape.css';
 export function useExperienceAudio(screenId: string, questionIndex: number) {
   const [musicEnabled, setMusicEnabled] = useState(true);
   const [voiceEnabled, setVoiceEnabled] = useState(true);
-  const [musicVolume, setMusicVolume] = useState(.38);
+  const [musicVolume, setMusicVolume] = useState(.25);
   const [voiceVolume, setVoiceVolume] = useState(.92);
   const [packReady, setPackReady] = useState(false);
   const [packLoading, setPackLoading] = useState(true);
