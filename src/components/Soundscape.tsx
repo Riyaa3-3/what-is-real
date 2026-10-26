@@ -139,7 +139,14 @@ export function useExperienceAudio(screenId: string, questionIndex: number) {
     }
   }, []);
 
+  // Only the visitor's response button advances the baseline sequence.
+  const cue = useCallback((key: string) => {
+    if (key === 'response') stopVoice();
+    else if (key === 'replay') replayVoice();
+  }, [stopVoice, replayVoice]);
+
   return {
+    cue,
     musicEnabled, setMusicEnabled,
     voiceEnabled, setVoiceEnabled,
     musicVolume, setMusicVolume,
