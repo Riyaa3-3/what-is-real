@@ -1,0 +1,68 @@
+.entry-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  background: #020305;
+  color: #f0f2f4;
+  isolation: isolate;
+  overflow: hidden;
+}
+.entry-gate-surface {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100%;
+  border: 0;
+  background: #020305;
+  color: #e7eaee;
+  padding: 60px clamp(24px, 6vw, 80px);
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.entry-gate-prompt {
+  max-width: 720px;
+  font-family: "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: clamp(16px, 2.15vw, 23px);
+  font-weight: 400;
+  line-height: 1.9;
+  letter-spacing: .04em;
+  text-wrap: balance;
+}
+.entry-gate-audio {
+  position: absolute;
+  z-index: 3;
+  right: max(20px, env(safe-area-inset-right));
+  top: calc(20px + env(safe-area-inset-top));
+}
+.entry-gate-audio .audio-console-trigger {
+  color: #e7eaee;
+  padding: 0 6px;
+  min-height: 44px;
+}
+.entry-gate-audio .audio-console-panel {
+  right: 0;
+}
+@media (max-width: 600px) {
+  .entry-gate-surface {
+    padding-inline: 12%;
+  }
+  .entry-gate-prompt {
+    font-size: clamp(15px, 4.2vw, 19px);
+    line-height: 2;
+  }
+  .entry-gate-audio {
+    right: calc(18px + env(safe-area-inset-right));
+    top: calc(10px + env(safe-area-inset-top));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .entry-gate * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
