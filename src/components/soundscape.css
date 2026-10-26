@@ -25,3 +25,6 @@
 .baseline-audio-actions{display:flex;align-items:center;justify-content:center;gap:clamp(12px,2vw,25px);flex-wrap:wrap}
 .baseline-audio-actions .text-button{min-height:44px;letter-spacing:.07em}
 @media(max-width:540px){.baseline-audio-actions{flex-direction:column}.baseline-audio-actions>*{max-width:100%;width:min(100%,280px)}}
+
+.audio-needs-import{border:1px solid #b9cbd66c;padding:3px 5px;color:#d4bd93;font-size:8px;letter-spacing:.08em;margin-left:2px}
+@media(max-width:680px){.audio-needs-import{font-size:7px;padding:2px 3px}}
