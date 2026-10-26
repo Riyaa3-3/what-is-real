@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {initialState, restoreState, advanceBaseline} from '../src/state.ts';
 import {SUBTITLE_COPY, subtitleText, subtitlesReady} from '../src/data/subtitles.ts';
 import {screens} from '../src/data/screens.ts';
+import {BACKGROUND_KEY, BASELINE_CLIPS, baselineClip, AUDIO_KEYS} from '../src/data/audioCueMap.ts';
 
 test('new sessions contain no invented visitor choices or subtitles', () => {
   const state = initialState();
@@ -91,4 +92,23 @@ test('all 32 source screens retain order, missing 21 and both confirmed final qu
   assert.equal(screens.find(s=>s.id==='04')?.blocks.length,3);
   assert.equal(screens.find(s=>s.id==='05')?.blocks.length,4);
   assert.ok(screens.find(s=>s.id==='16')?.blocks.every(b=>b.zh===undefined));
+});
+
+test('nine licensed audio slots match the film baseline in the exact user-selected 3+4+1 order', () => {
+  assert.equal(BACKGROUND_KEY, 'background/atmosphere-loop.mp3');
+  assert.equal(AUDIO_KEYS.length, 9);
+  assert.equal(new Set(AUDIO_KEYS).size, 9);
+  assert.deepEqual(Object.keys(BASELINE_CLIPS), ['04', '05', '06']);
+  assert.deepEqual([BASELINE_CLIPS['04'].length, BASELINE_CLIPS['05'].length, BASELINE_CLIPS['06'].length], [3, 4, 1]);
+  assert.equal(baselineClip('04',0), 'baseline/cells-01-institution.mp3');
+  assert.equal(baselineClip('04',1), 'baseline/cells-02-cell.mp3');
+  assert.equal(baselineClip('04',2), 'baseline/cells-03-duties.mp3');
+  assert.equal(baselineClip('05',0), 'baseline/interlinked-01-hold-hand.mp3');
+  assert.equal(baselineClip('05',1), 'baseline/interlinked-02-finger.mp3');
+  assert.equal(baselineClip('05',2), 'baseline/interlinked-03-heart.mp3');
+  assert.equal(baselineClip('05',3), 'baseline/interlinked-04-dream.mp3');
+  assert.equal(baselineClip('06',0), 'baseline/within-cells-interlinked.mp3');
+  assert.equal(baselineClip('05',4), null);
+  assert.equal(baselineClip('08',0), null);
+  assert.equal(baselineClip('04',-1), null);
 });

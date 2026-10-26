@@ -1,0 +1,74 @@
+name: Publish V2 preview alongside unchanged V1
+
+on:
+  push:
+    branches:
+      - feat/chapter-motion-audio-v2
+    paths:
+      - .github/workflows/preview-v2-pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/feat/chapter-motion-audio-v2'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout V2 preview source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Test and build V2
+        run: |
+          npm ci
+          npm test
+          npm run build
+          mkdir -p preview-release/preview-v2
+          cp -a dist/. preview-release/preview-v2/
+      - name: Checkout original V1 source without changing it
+        uses: actions/checkout@v4
+        with:
+          ref: feat/immersive-narrative
+          path: original-src
+          persist-credentials: false
+      - name: Test and build original V1
+        working-directory: original-src
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - name: Assemble both versions at separate paths
+        run: |
+          cp -a original-src/dist/. preview-release/
+          test -s preview-release/index.html
+          test -s preview-release/preview-v2/index.html
+          echo "V1 root and V2 /preview-v2/ are both present"
+      - name: Verify GitHub Pages is configured
+        uses: actions/configure-pages@v5
+        with:
+          enablement: false
+      - name: Upload one site with two isolated builds
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: preview-release
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy V1 plus V2 preview
+        id: deployment
+        uses: actions/deploy-pages@v4

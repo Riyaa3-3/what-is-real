@@ -687,7 +687,8 @@ button svg {
   position: relative;
 }
 .signal-word.glitch {
-  animation: glitch-displace .45s steps(1) both;
+  /* Sustain signal interference across the slower, one-second word flashes. */
+  animation: glitch-displace .88s steps(1) both;
 }
 .signal-word.glitch:before,.signal-word.glitch:after {
   content: attr(data-text);
