@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { CopyBlock, Option } from '../types';
+import { withoutSentencePeriods } from '../utils/punctuation';
 export function Bilingual({
   en,
   zh,
@@ -7,7 +8,7 @@ export function Bilingual({
 }: CopyBlock & {
   className?: string;
 }) {
-  return <div className={`bilingual ${className}`}><div className="en">{en}</div>{zh && <div className="zh" lang="zh-CN">{zh}</div>}</div>;
+  return <div className={`bilingual ${className}`}><div className="en">{withoutSentencePeriods(en)}</div>{zh && <div className="zh" lang="zh-CN">{withoutSentencePeriods(zh)}</div>}</div>;
 }
 export function Action({
   children,

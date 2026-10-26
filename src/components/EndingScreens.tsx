@@ -4,6 +4,7 @@ import { screens } from '../data/screens';
 import { subtitleText } from '../data/subtitles';
 import { Action, Bilingual, Options, PanelLabel } from './UI';
 import './ending.css';
+import { withoutSentencePeriods } from '../utils/punctuation';
 const screen = (id: string) => screens.find(item => item.id === id)!;
 const choice = (state: ExperienceState, key: ChoiceKey): CopyBlock => {
   const entry = screens.find(item => item.choiceKey === key);
@@ -14,7 +15,7 @@ const choice = (state: ExperienceState, key: ChoiceKey): CopyBlock => {
 const reason = (value: string): CopyBlock => screen('18').options?.find(option => option.value === value) ?? {
   en: value
 };
-const formatCopy = (copy: CopyBlock) => copy.en + (copy.zh ? `\n${copy.zh}` : '');
+const formatCopy = (copy: CopyBlock) => withoutSentencePeriods(copy.en) + (copy.zh ? `\n${withoutSentencePeriods(copy.zh)}` : '');
 
 /** Export contains only the visitor's actual choices and the source option text. */
 export function createReviewText(state: ExperienceState): string {
@@ -26,7 +27,7 @@ export function createReviewText(state: ExperienceState): string {
     }));
   }
   for (const [key, label] of [['qMemory', 'MEMORY'], ['qEmotion', 'INTERLINKED'], ['qAutonomy', 'DISTINCT'], ['memoryFrame', 'EVENT / OWNERSHIP']] as const) lines.push('', label, formatCopy(choice(state, key)));
-  lines.push('', 'TRANSLATION', 'JOI / I wanna be real for you.', subtitleText(state, 'Joi') || '—', 'K / You are real for me.', subtitleText(state, 'K') || '—');
+  lines.push('', 'TRANSLATION', 'JOI / I wanna be real for you', withoutSentencePeriods(subtitleText(state, 'Joi')) || '—', 'K / You are real for me', withoutSentencePeriods(subtitleText(state, 'K')) || '—');
   lines.push('', 'WHY THIS TRANSLATION?');
   if (!state.translationReasons.length && !state.translationReasonText.trim()) lines.push('—');
   state.translationReasons.forEach(value => lines.push(formatCopy(reason(value))));
@@ -224,7 +225,7 @@ function Journey({
         </article>
         <article className="journey-card">
           <PanelLabel>02 / TRANSLATION</PanelLabel><h2>Translation <span lang="zh-CN">翻译</span></h2>
-          <div className="journey-subtitles"><div><span>JOI</span><p lang="zh-CN">{subtitleText(state, 'Joi') || '—'}</p></div><div><span>K</span><p lang="zh-CN">{subtitleText(state, 'K') || '—'}</p></div></div>
+          <div className="journey-subtitles"><div><span>JOI</span><p lang="zh-CN">{withoutSentencePeriods(subtitleText(state, 'Joi')) || '—'}</p></div><div><span>K</span><p lang="zh-CN">{withoutSentencePeriods(subtitleText(state, 'K')) || '—'}</p></div></div>
           <div className="journey-reasons">{state.translationReasons.map(value => <Bilingual key={value} {...reason(value)} />)}</div>
           {state.translationReasonText && <p className="visitor-text">{state.translationReasonText}</p>}
           {!state.translationReasons.length && !state.translationReasonText && <p>—</p>}
@@ -263,8 +264,8 @@ function FinalQuestion({
   };
   return <section className="ending-wrap final-wrap">
     <div className="final-premise">{data.blocks.slice(0, 2).map(block => <Bilingual key={block.en} {...block} />)}</div>
-    <header className="final-question"><h1>{data.blocks[2].en}</h1><div className="zh" lang="zh-CN">{data.blocks[2].zh}</div></header>
-    <div className="final-writing" hidden={!writing}><label htmlFor={`thought-${screenId}`}>WRITE YOUR THOUGHT. <span lang="zh-CN">写下你的想法。</span></label><textarea ref={textarea} id={`thought-${screenId}`} value={state[field]} onChange={event => update({
+    <header className="final-question"><h1>{withoutSentencePeriods(data.blocks[2].en)}</h1><div className="zh" lang="zh-CN">{data.blocks[2].zh && withoutSentencePeriods(data.blocks[2].zh)}</div></header>
+    <div className="final-writing" hidden={!writing}><label htmlFor={`thought-${screenId}`}>WRITE YOUR THOUGHT <span lang="zh-CN">写下你的想法</span></label><textarea ref={textarea} id={`thought-${screenId}`} value={state[field]} onChange={event => update({
         [field]: event.target.value
       })} maxLength={4000} rows={4} /></div>
     <div className="final-controls">
@@ -305,7 +306,7 @@ function Credits({
       if (event.target === event.currentTarget) dialog.current?.close();
     }}>
       <div className="ending-dialog-header"><h2 id="references-title">REFERENCES</h2><button className="text-button" onClick={() => dialog.current?.close()}>CLOSE <span aria-hidden="true">×</span></button></div>
-      <div className="source-types"><div><h3>FILM QUOTATIONS</h3><p>Blade Runner 2049 (2017). Baseline sequence and Joi / K dialogue.</p></div><div><h3>ORIGINAL QUESTIONS</h3><p>Memory, emotion, autonomy, virtual companionship scenarios and reflections: user-provided Word V1.2 script.</p></div><div><h3>INTERPRETIVE TRANSLATIONS</h3><p>Chinese subtitle alternatives and translation notes: user-provided script. Visitor-written subtitles are recorded as custom translations.</p></div></div>
+      <div className="source-types"><div><h3>FILM QUOTATIONS</h3><p>Blade Runner 2049 (2017) Baseline sequence and Joi / K dialogue</p></div><div><h3>ORIGINAL QUESTIONS</h3><p>Memory, emotion, autonomy, virtual companionship scenarios and reflections: user-provided Word V1.2 script</p></div><div><h3>INTERPRETIVE TRANSLATIONS</h3><p>Chinese subtitle alternatives and translation notes: user-provided script Visitor-written subtitles are recorded as custom translations</p></div></div>
       <ol className="reference-list">{references.map(reference => <li key={reference.url}><a href={reference.url} target="_blank" rel="noreferrer">{reference.name}<span aria-hidden="true"> ↗</span></a></li>)}</ol>
       <p className="source-basis">何以为真_网站逐屏视觉与交互脚本_V1.2双端定稿.docx</p>
     </dialog>

@@ -5,6 +5,7 @@ import {SUBTITLE_COPY, subtitleText, subtitlesReady} from '../src/data/subtitles
 import {screens} from '../src/data/screens.ts';
 import {BACKGROUND_KEY, BASELINE_CLIPS, baselineClip, AUDIO_KEYS} from '../src/data/audioCueMap.ts';
 import {resolveHostedAudioUrl} from '../src/audio/hosted.ts';
+import {withoutSentencePeriods} from '../src/utils/punctuation.ts';
 
 test('new sessions contain no invented visitor choices or subtitles', () => {
   const state = initialState();
@@ -122,4 +123,15 @@ test('public website resolves all nine audio files without any visitor import', 
     assert.equal(resolveHostedAudioUrl(key, 'https://example.github.io/what-is-real/preview-v2/'), nested);
   }
   assert.throws(() => resolveHostedAudioUrl('../private.mp3', 'https://example.com/'));
+});
+
+test('published text removes sentence periods without changing research copy, decimal values or links', () => {
+  assert.equal(withoutSentencePeriods('Your memories can be implanted. Your identity is a number.'), 'Your memories can be implanted Your identity is a number');
+  assert.equal(withoutSentencePeriods('记忆可以被植入。情感是真实的。'), '记忆可以被植入情感是真实的');
+  assert.equal(withoutSentencePeriods('I wanna be real for you.'), 'I wanna be real for you');
+  assert.equal(withoutSentencePeriods('在我心里，你就是真实的存在。'), '在我心里，你就是真实的存在');
+  assert.equal(withoutSentencePeriods('V1.2 / https://github.com/a.b / 25.5'), 'V1.2 / https://github.com/a.b / 25.5');
+  assert.equal(withoutSentencePeriods('An unexpected feeling...'), 'An unexpected feeling...');
+  assert.equal(SUBTITLE_COPY.Joi.A, '我想为你变得真实。');
+  assert.equal(SUBTITLE_COPY.K.B, '在我心里，你就是真实的存在。');
 });

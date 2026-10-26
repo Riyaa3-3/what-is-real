@@ -196,10 +196,10 @@ export function AudioControls(props: SoundProps) {
           ▶ START SOUND
         </button>}
       {props.voiceError && <div className="audio-import-error" role="alert">
-        FILM AUDIO UNAVAILABLE — please check your connection.
+        FILM AUDIO UNAVAILABLE — please check your connection
       </div>}
       <div className="audio-console-help" lang="zh-CN">
-        背景音乐和电影测试原声已经内置在正式网站中，无需下载或导入文件。部分浏览器需要首次点击才能开始有声播放。
+        背景音乐和电影测试原声已经内置在正式网站中，无需下载或导入文件，部分浏览器需要首次点击才能开始有声播放
       </div>
     </div>
   </details>;
