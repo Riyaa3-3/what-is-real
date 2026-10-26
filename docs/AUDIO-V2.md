@@ -26,6 +26,6 @@ The baseline section receives its own looping ambience, and buttons trigger opti
 A chapter interlude is shown on navigation into a new chapter, including back navigation and manual chapter navigation. Users can skip it. System reduced-motion users receive a static interlude with a Continue action. Ambient electrical visual effects are entirely decorative.
 
 ## Important limits
-Audio playback currently has fade-in on start, but **not yet proper crossfading between real audio tracks**. The audio cue playback helper plays supplied cues independently, so long cues need a stop/cancellation manager before commercial use. Test actual audio files on Safari and mobile devices before publication. The audio control is working as an interface, but without user-provided tracks there is no background music to hear.
+The player attempts an approximately 850 ms crossfade between configured chapter tracks and switches to a separate baseline ambience. Baseline response cues stop on the next step or navigation; the actual timing and quality of supplied audio require browser validation. Test actual audio files on Safari and mobile devices before publication. With no user-provided tracks there is no background music to hear; only the small synthesized response cue is available after audio is enabled.
 
 Do not include copyrighted film soundtracks or dialogues without appropriate publication rights.
