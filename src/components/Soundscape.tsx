@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BACKGROUND_KEY, baselineClip } from '../data/audioCueMap';
-import { audioFileUrl, hasAudioPack, installAudioPack, restoreAudioPack } from '../audio/pack';
+import { audioFileUrl, downloadInstalledAudioPack, hasAudioPack, installAudioPack, restoreAudioPack } from '../audio/pack';
 import './soundscape.css';
 
 /**
@@ -203,6 +203,11 @@ export function AudioControls(props: SoundProps) {
             event.currentTarget.value = '';
           }} />
       </label>
+      {props.packReady && !props.packLoading && (
+        <button className="audio-pack-export" type="button" onClick={() => downloadInstalledAudioPack()}>
+          DOWNLOAD YOUR SAVED 9-TRACK PACK ↓
+        </button>
+      )}
       <div className="audio-import-status" role="status">
         {props.packLoading ? 'CHECKING LOCAL AUDIO…'
           : props.packReady ? '✓ ALL 9 TRACKS READY ON THIS DEVICE'
