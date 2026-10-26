@@ -6,6 +6,7 @@ import { Action, Bilingual, Options, PanelLabel } from './components/UI';
 import { SceneVisual, CoverVisual, Texture } from './components/Effects';
 import { SubtitleExperience } from './components/SubtitleExperience';
 import { EndingScreens } from './components/EndingScreens';
+import { AudioControls, ChapterInterlude, SignalLayer, useExperienceAudio } from './components/Enhancements';
 function useMotionPreference() {
   const [system, setSystem] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [manual, setManual] = useState(false);
@@ -20,33 +21,6 @@ function useMotionPreference() {
     toggle: () => setManual(v => !v),
     system
   };
-}
-function useSound(enabled: boolean, screenId: string) {
-  useEffect(() => {
-    if (!enabled || ['28', '29', '30a', '30b', '31'].includes(screenId)) return;
-    let ctx: AudioContext | undefined;
-    try {
-      ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = ['03', '04', '05', '06'].includes(screenId) ? 62 : screenId === '11' ? 88 : 47;
-      gain.gain.value = .009;
-      osc.connect(gain).connect(ctx.destination);
-      osc.start();
-      const visibility = () => {
-        if (document.hidden) void ctx?.suspend();else void ctx?.resume();
-      };
-      document.addEventListener('visibilitychange', visibility);
-      return () => {
-        document.removeEventListener('visibilitychange', visibility);
-        osc.stop();
-        void ctx?.close();
-      };
-    } catch {
-      void ctx?.close();
-    }
-  }, [enabled, screenId]);
 }
 function Cover({
   next,
@@ -110,13 +84,15 @@ function Baseline({
   state,
   update,
   next,
-  reduced
+  reduced,
+  audioCue
 }: {
   data: ScreenData;
   state: ExperienceState;
   update: ScreenProps['update'];
   next: () => void;
   reduced: boolean;
+  audioCue: (key: string) => void;
 }) {
   const [ready, setReady] = useState(data.id !== '06');
   useEffect(() => {
@@ -129,6 +105,8 @@ function Baseline({
   const index = Math.min(count, data.blocks.length - 1);
   const block = data.blocks[index];
   const repeat = () => {
+    audioCue(key === 'cells' ? 'cells' : key === 'interlinked' ? 'interlinked' : 'within');
+    audioCue('response');
     update({
       baselineOriginal: advanceBaseline(state, key)
     });
@@ -199,7 +177,7 @@ export default function App() {
     const id = location.hash.slice(1);
     return validId(id) ? id : '00';
   });
-  const [sound, setSound] = useState(false);
+  const [interlude, setInterlude] = useState<ScreenData | null>(null);
   const {
     reduced,
     toggle,
@@ -220,9 +198,12 @@ export default function App() {
       sessionStorage.setItem(SESSION_KEY, JSON.stringify(state));
     } catch {/* storage may be unavailable in privacy mode */}
   }, [state]);
-  useSound(sound, screenId);
+  const audio = useExperienceAudio(screenId, data.chapter);
   const navigate = useCallback((id: string) => {
     if (!validId(id)) return;
+    const from = screens.find(item => item.id === location.hash.slice(1)) ?? screens[0];
+    const to = screens.find(item => item.id === id)!;
+    setInterlude(from.chapter !== to.chapter && id !== '00' ? to : null);
     history.pushState(null, '', `#${id}`);
     setScreenId(id);
     setVisited(old => old.includes(id) ? old : [...old, id]);
@@ -236,6 +217,7 @@ export default function App() {
     const changed = () => {
       const id = location.hash.slice(1);
       if (validId(id)) {
+        setInterlude(null);
         setScreenId(id);
         setVisited(old => old.includes(id) ? old : [...old, id]);
       }
@@ -262,6 +244,7 @@ export default function App() {
     setStudy(false);
     navigate('00');
   };
+  const closeInterlude = useCallback(() => setInterlude(null), []);
   const props: ScreenProps = {
     screenId,
     state,
@@ -271,7 +254,7 @@ export default function App() {
     restart
   };
   const special = ['17', '18', '19', '26', '27', '28', '29', '30a', '30b', '31'].includes(screenId);
-  return <div className={`experience theme-${data.theme} screen-${screenId} ${reduced ? 'reduced-motion' : ''}`}><a className="skip-link" href="#main-content">Skip to content</a><Texture /><header className="site-header"><button className="brand" onClick={() => nav.current?.showModal()} aria-label="Open chapter navigation"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 3h8v8H3zM17 3h8v8h-8zM3 17h8v8H3zM17 17h8v8h-8z" /></svg><span>WHAT IS REAL<span className="brand-q">?</span></span></button><div className="chapter-display"><span className="signal-dot" />{data.chapter}<span className="chapter-screen"> / {data.number}</span></div><div className="header-controls"><span className="subtitle-indicator">SUBTITLES: EN <span>+ 中文注释</span></span><button className="utility sound-toggle" aria-pressed={sound} onClick={() => setSound(s => !s)}><span aria-hidden="true">{sound ? '◖))' : '◖×'}</span> SOUND {sound ? 'ON' : 'OFF'}</button><button className="utility motion-toggle" aria-pressed={reduced} onClick={toggle} title={system ? 'System reduced motion is enabled' : 'Reduce animation'}>MOTION {reduced ? 'LOW' : 'FULL'}</button><button className="utility menu-toggle" onClick={() => nav.current?.showModal()} aria-label="Open chapters and display mode">☰</button></div></header><main id="main-content" ref={main} tabIndex={-1} className={`screen-main ${special ? 'special-main' : ''}`} key={screenId}>{screenId === '00' ? <Cover next={next} reduced={reduced} /> : <><div className="screen-caption"><span className="screen-number">{data.number}</span><div><div>{data.title}</div></div></div><SceneVisual screenId={screenId} /><div className={`content ${special ? 'special-content' : ''}`}>{['04', '05', '06'].includes(screenId) ? <Baseline data={data} {...props} reduced={reduced} /> : ['17', '18', '19'].includes(screenId) ? <SubtitleExperience {...props} /> : special ? <EndingScreens {...props} /> : <GenericScreen data={data} {...props} />}</div></>}</main><footer className="site-footer"><button className="chapter-trigger" onClick={() => nav.current?.showModal()}><span className="progress-ticks" aria-hidden="true">{screens.map((s, i) => <i key={s.id} className={i <= index ? 'filled' : ''} />)}</span><span>{String(index + 1).padStart(2, '0')} / {screens.length} <span className="footer-mode">— {study ? 'STUDY MODE' : 'EXPERIENCE'}</span></span></button>{index > 0 && <button className="text-button back-button" onClick={() => navigate(screens[index - 1].id)}>← BACK</button>}</footer><dialog aria-label="Chapter navigation" ref={nav} className="chapter-dialog" onClick={e => {
+  return <div className={`experience theme-${data.theme} screen-${screenId} ${reduced ? 'reduced-motion' : ''}`}><a className="skip-link" href="#main-content">Skip to content</a><Texture />{interlude && <ChapterInterlude data={interlude} reduced={reduced} finish={closeInterlude} />}<header className="site-header"><button className="brand" onClick={() => nav.current?.showModal()} aria-label="Open chapter navigation"><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 3h8v8H3zM17 3h8v8h-8zM3 17h8v8H3zM17 17h8v8h-8z" /></svg><span>WHAT IS REAL<span className="brand-q">?</span></span></button><div className="chapter-display"><span className="signal-dot" />{data.chapter}<span className="chapter-screen"> / {data.number}</span></div><div className="header-controls"><span className="subtitle-indicator">SUBTITLES: EN <span>+ 中文注释</span></span><AudioControls enabled={audio.enabled} setEnabled={audio.setEnabled} volume={audio.volume} setVolume={audio.setVolume} /><button className="utility motion-toggle" aria-pressed={reduced} onClick={toggle} title={system ? 'System reduced motion is enabled' : 'Reduce animation'}>MOTION {reduced ? 'LOW' : 'FULL'}</button><button className="utility menu-toggle" onClick={() => nav.current?.showModal()} aria-label="Open chapters and display mode">☰</button></div></header><main id="main-content" ref={main} tabIndex={-1} className={`screen-main ${special ? 'special-main' : ''}`} key={screenId}>{screenId === '00' ? <Cover next={next} reduced={reduced} /> : <><div className="screen-caption"><span className="screen-number">{data.number}</span><div><div>{data.title}</div></div></div><SceneVisual screenId={screenId} /><SignalLayer reduced={reduced} /><div className={`content ${special ? 'special-content' : ''}`}>{['04', '05', '06'].includes(screenId) ? <Baseline data={data} {...props} reduced={reduced} audioCue={audio.cue} /> : ['17', '18', '19'].includes(screenId) ? <SubtitleExperience {...props} /> : special ? <EndingScreens {...props} /> : <GenericScreen data={data} {...props} />}</div></>}</main><footer className="site-footer"><button className="chapter-trigger" onClick={() => nav.current?.showModal()}><span className="progress-ticks" aria-hidden="true">{screens.map((s, i) => <i key={s.id} className={i <= index ? 'filled' : ''} />)}</span><span>{String(index + 1).padStart(2, '0')} / {screens.length} <span className="footer-mode">— {study ? 'STUDY MODE' : 'EXPERIENCE'}</span></span></button>{index > 0 && <button className="text-button back-button" onClick={() => navigate(screens[index - 1].id)}>← BACK</button>}</footer><dialog aria-label="Chapter navigation" ref={nav} className="chapter-dialog" onClick={e => {
       if (e.target === e.currentTarget) nav.current?.close();
     }}><div className="dialog-top"><PanelLabel>WHAT IS REAL? / CHAPTERS</PanelLabel><button className="dialog-close" aria-label="Close chapter navigation" onClick={() => nav.current?.close()}>×</button></div><div className="mode-switch"><button aria-pressed={!study} onClick={() => setStudy(false)}>EXPERIENCE</button><button aria-pressed={study} onClick={() => setStudy(true)}>STUDY MODE</button></div><p className="mode-note">{study ? 'Explore every chapter. Your previous choices are preserved.' : 'Follow the narrative. Revisit the screens you have reached.'}</p><nav className="chapter-list" aria-label="Chapters">{screens.map(s => <button key={s.id} disabled={!study && !visited.includes(s.id)} aria-current={s.id === screenId ? 'page' : undefined} onClick={() => navigate(s.id)}><span>{s.number}</span><div>{s.title}</div><span aria-hidden="true">↗</span></button>)}</nav></dialog></div>;
 }
