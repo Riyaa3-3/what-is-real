@@ -1,0 +1,23 @@
+.audio-console{position:relative;z-index:70;color:var(--fg,#e8eff2);font-family:var(--font-mono,monospace)}
+.audio-console-trigger{display:flex;align-items:center;gap:6px;list-style:none;cursor:pointer;color:inherit;white-space:nowrap}
+.audio-console-trigger::-webkit-details-marker{display:none}
+.audio-console-trigger>span{font-size:17px;color:var(--accent,#b4cde0)}
+.audio-console[open] .audio-console-trigger{color:var(--accent,#b4cde0)}
+.audio-console-panel{position:absolute;z-index:80;top:calc(100% + 18px);right:-38px;width:min(330px,calc(100vw - 28px));padding:18px;background:#091019f5;border:1px solid #9fc5d058;box-shadow:0 18px 65px #000b,0 0 32px #4985a024;color:#dce8ee;backdrop-filter:blur(16px);letter-spacing:.04em}
+.audio-console-heading{font-size:10px;letter-spacing:.13em;color:#7896aa;margin-bottom:16px}
+.audio-console-heading span{color:#dce8ee}
+.audio-console-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.audio-console-row>button{cursor:pointer;color:#c8e2ed;background:#0c1c27;border:1px solid #79a2b050;font:10px var(--font-mono,monospace);min-height:38px;padding:7px 12px;white-space:nowrap}
+.audio-console-row>button[aria-pressed='true']{border-color:#a3cfde9e;box-shadow:inset 0 0 18px #60a7cb15}
+.audio-console-row>label{display:flex;align-items:center;gap:7px;font-size:9px;color:#a0b4c3}
+.audio-console-row input[type=range]{width:90px;accent-color:#a9cfda;cursor:pointer}
+.audio-console-row input:disabled{opacity:.35}
+.audio-console-divider{height:1px;background:#93a9b638;margin:13px 0 16px}
+.audio-import-control{display:flex;justify-content:center;align-items:center;position:relative;padding:12px;min-height:44px;border:1px dashed #a6ced58c;background:#12304199;text-align:center;cursor:pointer;font-size:10px;letter-spacing:.12em;color:#d0e7ef}
+.audio-import-control:hover{background:#24516a9c}
+.audio-import-control input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.audio-import-status{margin-top:13px;font-size:9px;color:#b3cfd3;line-height:1.5}
+.audio-import-error{font-size:10px;margin-top:10px;color:#ffadb7;line-height:1.5}
+.audio-console-help{font-size:11px;line-height:1.7;color:#91a6b0;margin-top:9px;letter-spacing:0}
+@media(max-width:760px){.audio-console-trigger{font-size:9px;min-width:50px}.audio-console-panel{right:-65px;top:calc(100% + 12px);max-width:calc(100vw - 22px)}.audio-console-row input[type=range]{width:75px}}
+@media(prefers-reduced-motion:reduce){.audio-console *{animation:none!important;transition:none!important}}
