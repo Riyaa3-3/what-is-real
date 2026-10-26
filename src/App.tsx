@@ -104,8 +104,8 @@ function Baseline({
   const count = state.baselineOriginal[key];
   const index = Math.min(count, data.blocks.length - 1);
   const block = data.blocks[index];
+  useEffect(() => { audioCue(key); }, [key, count]);
   const repeat = () => {
-    audioCue(key === 'cells' ? 'cells' : key === 'interlinked' ? 'interlinked' : 'within');
     audioCue('response');
     update({
       baselineOriginal: advanceBaseline(state, key)
