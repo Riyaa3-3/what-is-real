@@ -39,20 +39,27 @@ function Cover({
     setLeaving(true);
     exitTimer.current = window.setTimeout(next, 450);
   };
+  // Four distinct electronic signal flashes: ~1.05s each, followed by a short
+  // silent blackout. Total intro is ~5.55s rather than the previous ~2.55s.
+  const introStart = 700;
+  const wordDuration = 1050;
+  const flashEnd = introStart + 4 * wordDuration;
+  const titleStart = flashEnd + 650;
   useEffect(() => {
-    if (skipped) return;
+    if (skipped || reduced) return;
     const start = performance.now();
     const timer = window.setInterval(() => {
       const ms = performance.now() - start;
       setElapsed(ms);
-      if (ms >= 3350) window.clearInterval(timer);
-    }, 25);
+      if (ms >= titleStart) window.clearInterval(timer);
+    }, 30);
     return () => window.clearInterval(timer);
-  }, [skipped]);
+  }, [skipped, reduced, titleStart]);
   const words = ['Real?', 'Virtual?', 'Feeling?', 'Love?'];
-  const index = elapsed < 350 ? -1 : elapsed < 2150 ? Math.min(3, Math.floor((elapsed - 350) / 450)) : -1;
-  const title = skipped || elapsed >= 2550;
-  return <div className={`cover-stage ${title ? 'title-visible' : ''} ${!skipped && (elapsed < 350 || elapsed >= 2150 && elapsed < 2550) || leaving ? 'opening-blank' : ''}`}><CoverVisual /><div className="signal-shutter" aria-hidden="true" />{!title && <><div className="signal-word-zone" aria-live="off">{index >= 0 && <div key={index} className={`signal-word ${reduced ? '' : 'glitch'}`} data-text={words[index]}>{words[index]}</div>}</div><button className="skip-intro text-button" onClick={() => setSkipped(true)}>SKIP INTRO <span aria-hidden="true">↗</span></button></>}{title && <div className="cover-copy"><div className="eyebrow">MEMORY / TRANSLATION / ARTIFICIAL INTIMACY</div><h1>WHAT IS REAL<span className="title-question">?</span></h1><div className="cover-chinese" lang="zh-CN">何以为“真”？</div><Bilingual {...screens[0].blocks[1]} className="cover-subtitle" /><Action disabled={leaving} onClick={initialize}><Bilingual en="INITIALIZE EXPERIENCE" zh="进入体验" /></Action></div>}<div className="cover-coordinate" aria-hidden="true"><span>00 — SIGNAL / REAL</span><span>2049 / N-001</span></div></div>;
+  const index = elapsed >= introStart && elapsed < flashEnd ? Math.floor((elapsed - introStart) / wordDuration) : -1;
+  const title = reduced || skipped || elapsed >= titleStart;
+  const blank = leaving || (!title && (elapsed < introStart || elapsed >= flashEnd));
+  return <div className={`cover-stage ${title ? 'title-visible' : ''} ${blank ? 'opening-blank' : ''}`}><CoverVisual /><div className="signal-shutter" aria-hidden="true" />{!title && <><div className="signal-word-zone" aria-live="off">{index >= 0 && <div key={index} className={`signal-word ${reduced ? '' : 'glitch'}`} data-text={words[index]}>{words[index]}</div>}</div><button className="skip-intro text-button" onClick={() => setSkipped(true)}>SKIP INTRO <span aria-hidden="true">↗</span></button></>}{title && <div className="cover-copy"><div className="eyebrow">MEMORY / TRANSLATION / ARTIFICIAL INTIMACY</div><h1>WHAT IS REAL<span className="title-question">?</span></h1><div className="cover-chinese" lang="zh-CN">何以为“真”？</div><Bilingual {...screens[0].blocks[1]} className="cover-subtitle" /><Action disabled={leaving} onClick={initialize}><Bilingual en="INITIALIZE EXPERIENCE" zh="进入体验" /></Action></div>}<div className="cover-coordinate" aria-hidden="true"><span>00 — SIGNAL / REAL</span><span>2049 / N-001</span></div></div>;
 }
 function TypeLine({
   text,
