@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { BACKGROUND_KEY, baselineClip } from '../data/audioCueMap';
+import { resolveHostedAudioUrl } from '../audio/hosted';
 import './soundscape.css';
 
 /**
@@ -8,7 +9,7 @@ import './soundscape.css';
  */
 function hostedAudioUrl(key: string): string {
   const appRoot = new URL(import.meta.env.BASE_URL, document.baseURI);
-  return new URL('audio/' + key, appRoot).href;
+  return resolveHostedAudioUrl(key, appRoot.href);
 }
 
 type AudioStatus = 'loading' | 'playing' | 'awaiting-gesture' | 'error' | 'off';
