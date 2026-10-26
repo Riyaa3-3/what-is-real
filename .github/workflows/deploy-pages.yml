@@ -1,4 +1,4 @@
-# V2 preview includes optional local nine-track audio pack import; V1 remains at root.
+# Publish original V1 at root and V2 preview with 25% default BGM and slower cover at /preview-v2/.
 name: Deploy GitHub Pages
 
 on:
