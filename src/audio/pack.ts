@@ -85,6 +85,23 @@ export async function restoreAudioPack(): Promise<boolean> {
   } catch { return false; }
 }
 export function hasAudioPack(): boolean { return activePack !== null; }
+/** Browser-hosted export of the validated, previously imported nine-track pack.
+ * This avoids downloading files from the ChatGPT sandbox altogether.
+ */
+export function downloadInstalledAudioPack(): boolean {
+  if (!activePack) return false;
+  const url = URL.createObjectURL(activePack.blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = 'WHAT_IS_REAL_audio_pack.wiraudio';
+  anchor.style.display = 'none';
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+  return true;
+}
+
 export function audioFileUrl(key: string): string {
   if (!AUDIO_KEYS.includes(key)) throw Error('Unknown audio track: ' + key);
   const entry = activePack?.entries.get(key);
