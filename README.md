@@ -56,7 +56,7 @@ npm run build
 
 用户选择、理由、自定义字幕和两次开放回答存于当前标签页的 `sessionStorage`；不需要账号，不上传服务端，不加入分析追踪。刷新同一标签页可恢复；重新开始清空体验记录。序章最初判断与回顾时重新判断分别保留。没有原12人调查模块、统计数据、受访者观点、人性评分或心理结论。
 
-英文字体通过本地构建资源提供，中文使用系统字体回退。没有图片API、第三方图片服务或外部字体请求。访客首次使用九轨电影原声及背景音乐时，可在 AUDIO 菜单导入聊天中提供的音频包；音频包只存于当前浏览器，不上传服务端。上传并成功部署 `WHAT_IS_REAL_V2_audio_for_GitHub.zip` 后，GitHub Actions 会自动校验并解包九段 MP3 到正式站点，访客无须导入音频包。浏览器自动播放限制不影响无声完成体验。
+英文字体通过本地构建资源提供，中文使用系统字体回退。没有图片API、第三方图片服务或外部字体请求。访客首次使用九轨电影原声及背景音乐时，可在 AUDIO 菜单导入聊天中提供的音频包；音频包只存于当前浏览器，不上传服务端。上传并成功部署 `WHAT_IS_REAL_audio_pack.wiraudio`（或 ZIP）后，GitHub Actions 会自动校验并解包九段 MP3 到正式站点，访客无须导入音频包。浏览器自动播放限制不影响无声完成体验。
 
 ## 正式部署
 
@@ -66,6 +66,6 @@ npm run build
 
 `.github/workflows/ci.yml` 在 push 和 pull request 时执行单元测试与构建。正式 GitHub Pages 工作流 `.github/workflows/deploy-pages.yml` 在 `main` 更新后自动构建、测试并发布 `dist/` 至正式网站根路径，也允许手动从 `main` 运行。
 
-音频源文件的托管与首次导入步骤见 [音频使用说明](docs/AUDIO-V2.md)。**自动发布音频最后一步：** 从本次对话下载 `WHAT_IS_REAL_V2_audio_for_GitHub.zip`，在 [GitHub 上传页面](https://github.com/Riyaa3-3/what-is-real/upload/main) 把 ZIP 原样上传到 `main` 根目录并提交。发布工作流会核验原始九段录音的 SHA-256、将它们解包到 `dist/audio/`，随后自动部署。上传前新访客仍需通过 AUDIO 导入音频包；上传和部署成功后，不必再导入。
+音频源文件的托管与首次导入步骤见 [音频使用说明](docs/AUDIO-V2.md)。**自动发布音频最后一步：** 直接使用电脑上曾用于试听的 `WHAT_IS_REAL_audio_pack.wiraudio` 文件（无需重新下载 ZIP），在 [GitHub 上传页面](https://github.com/Riyaa3-3/what-is-real/upload/main) 上传到 `main` 根目录并提交。系统也兼容原 ZIP。发布工作流会校验九段录音的 SHA-256 并自动发布至 `dist/audio/`。上传前新访客仍需通过 AUDIO 导入音频包；上传部署成功后无需再导入。
 
 影片原声的公开使用由素材权利提供方确认。请在最终发布时核实素材授权范围及其他原始视觉素材的使用权限。
