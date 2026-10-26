@@ -1,8 +1,7 @@
-import { AUDIO_KEYS } from '../data/audioCueMap';
-
-/** URL of a published MP3, independent of chapter navigation or hash fragments. */
+/** Deterministic GitHub Pages audio URL, safe under nested deployments. */
 export function resolveHostedAudioUrl(key: string, appBaseUrl: string): string {
-  if (!AUDIO_KEYS.includes(key)) throw new Error('Unrecognized audio file');
-  const base = new URL(appBaseUrl);
-  return new URL('audio/' + key, base).href;
+  if (!/^(background|baseline)\/[a-z0-9-]+\.mp3$/.test(key)) {
+    throw new Error('Unrecognized audio file');
+  }
+  return new URL('audio/' + key, new URL(appBaseUrl)).href;
 }
