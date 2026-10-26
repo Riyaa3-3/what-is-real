@@ -45,37 +45,37 @@ The pack is stored only in the current browser's IndexedDB. Nothing is uploaded
 from the user's device to GitHub or another server by the importer. Other
 visitors/devices must separately import the pack until the actual files are hosted.
 
-## Publish all nine MP3s for every visitor — one ZIP upload
+## Publish soundtracks — upload your existing .wiraudio file (no ZIP download)
 
-The user confirmed authorization to make the provided audio publicly available.
-The nine converted MP3 files are bundled into one downloadable artifact named
-`WHAT_IS_REAL_V2_audio_for_GitHub.zip`.
+You can publish the nine audio files without downloading a new ZIP. The
+`WHAT_IS_REAL_audio_pack.wiraudio` file that the user previously imported into
+the working website contains exactly the same nine approved MP3 recordings.
+The `main` deployment workflow now recognizes this **original file** directly.
 
-**No extraction and no coding are required.**
+1. Locate `WHAT_IS_REAL_audio_pack.wiraudio` in your computer's Downloads
+   folder (the same file previously imported using the site's AUDIO control).
+2. Open https://github.com/Riyaa3-3/what-is-real/upload/main .
+3. Click **Choose your files** and select `WHAT_IS_REAL_audio_pack.wiraudio`.
+   Upload it to the root of `main`, without renaming or extracting.
+4. Click **Commit changes**. GitHub Actions will automatically decode and verify
+   all nine soundtracks, build, and publish the site.
+5. Wait for the **Deploy WHAT IS REAL? to GitHub Pages** workflow to succeed.
+6. Open https://riyaa3-3.github.io/what-is-real/ in a *new private browsing
+   window*, so the website cannot be relying on the earlier browser import.
 
-1. Download this exact ZIP from the ChatGPT conversation.
-2. Sign in to GitHub, open https://github.com/Riyaa3-3/what-is-real/upload/main .
-3. Choose **Choose your files**, select the entire original ZIP, and keep its filename unchanged.
-4. Check the destination is the repository root on `main`, not inside a subfolder.
-5. Click **Commit changes**. This push automatically triggers GitHub Pages publishing.
-6. In GitHub Actions, wait for the **Deploy WHAT IS REAL? to GitHub Pages** job to succeed.
-7. Visit https://riyaa3-3.github.io/what-is-real/ in a new private/incognito window.
-   The music and the eight film clips now resolve automatically from the public website.
+Alternatively, the original `WHAT_IS_REAL_V2_audio_for_GitHub.zip` also works
+if it is already on the computer. There is no need to download both files.
 
-The release workflow executes `scripts/unpack_audio_bundle.py` **before**
-the Vite build. It checks the exact nine filenames and SHA-256 hashes of the
-approved MP3 contents, extracts only those tracks, and verifies they exist
-in the generated `dist/audio/` directory. An incorrect ZIP causes the
-deployment to fail rather than silently publishing broken media.
+The build verifies nine approved filenames, exact SHA-256 contents,
+and their existence in `dist/audio/`. Unexpected inputs stop publication
+instead of silently creating corrupted or missing audio.
 
-Visitors no longer need the `.wiraudio` importer once the soundtrack ZIP
-has been uploaded and deployment succeeds. The importer stays available
-for local testing. Users with previously imported audio can continue using it
-on that browser.
+After successful deployment, visitors do not need to import audio manually.
+The audio importer remains in the UI only as an optional local testing tool.
 
-The background music is ON by default at 25% volume, separate from the 92%
-dialogue channel. The only unavoidable exception is browser autoplay policy:
-a visitor may need to click to begin audible playback.
+Background music defaults ON at 25%; film dialogue defaults ON at 92%, with
+separate controls. Browser autoplay restrictions may require a first click
+before any audible playback can start.
 
 ## Runtime, accessibility, and verification
 
