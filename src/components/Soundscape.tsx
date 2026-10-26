@@ -169,7 +169,7 @@ export function AudioControls(props: SoundProps) {
   };
   return <details className="audio-console">
     <summary className="utility audio-console-trigger" aria-label="Audio and imported soundtracks">
-      <span aria-hidden="true">♫</span> AUDIO {props.musicEnabled ? 'ON' : 'OFF'}
+      <span aria-hidden="true">♫</span> AUDIO {props.musicEnabled ? 'ON' : 'OFF'} {!props.packLoading && !props.packReady && <span className="audio-needs-import">IMPORT</span>}
     </summary>
     <div className="audio-console-panel">
       <div className="audio-console-heading">AUDIO CONTROL / <span>WHAT IS REAL?</span></div>
