@@ -54,6 +54,11 @@ The `main` deployment workflow now recognizes this **original file** directly.
 
 1. Locate `WHAT_IS_REAL_audio_pack.wiraudio` in your computer's Downloads
    folder (the same file previously imported using the site's AUDIO control).
+   **If the file is no longer in Downloads:** open the published site in the
+   **same browser where the movie dialogue previously played correctly**.
+   Click **AUDIO** and select **DOWNLOAD YOUR SAVED 9-TRACK PACK**.
+   This download comes from GitHub Pages and your own browser's local storage,
+   avoiding the failing ChatGPT file download links entirely.
 2. Open https://github.com/Riyaa3-3/what-is-real/upload/main .
 3. Click **Choose your files** and select `WHAT_IS_REAL_audio_pack.wiraudio`.
    Upload it to the root of `main`, without renaming or extracting.
