@@ -4,7 +4,7 @@ import './enhancements.css';
 
 export function ChapterInterlude({data,reduced,finish}:{data:ScreenData;reduced:boolean;finish:()=>void}) {
   useEffect(()=>{if(reduced)return;const t=setTimeout(finish,2050);return()=>clearTimeout(t)},[reduced,finish]);
-  return <div className={`chapter-interlude interlude-${data.theme}`} role="region" aria-label={`Entering ${data.chapter}`}>
+  return <div className={`chapter-interlude interlude-${data.theme} ${reduced ? 'interlude-reduced' : ''}`} role="region" aria-label={`Entering ${data.chapter}`}>
     <div className="interlude-noise" aria-hidden="true"/><span className="interlude-status">SYSTEM / CHAPTER TRANSFER</span>
     <div className="interlude-heading"><span>INCOMING SIGNAL / {data.number}</span><h1>{data.chapter}</h1><p lang="zh-CN">{data.zhTitle.split('·')[0].trim()}</p><div className="interlude-meter"/></div>
     <button onClick={finish}>{reduced?'CONTINUE':'SKIP TRANSITION'} ↗</button>
