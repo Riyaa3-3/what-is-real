@@ -21,3 +21,7 @@
 .audio-console-help{font-size:11px;line-height:1.7;color:#91a6b0;margin-top:9px;letter-spacing:0}
 @media(max-width:760px){.audio-console-trigger{font-size:9px;min-width:50px}.audio-console-panel{right:-65px;top:calc(100% + 12px);max-width:calc(100vw - 22px)}.audio-console-row input[type=range]{width:75px}}
 @media(prefers-reduced-motion:reduce){.audio-console *{animation:none!important;transition:none!important}}
+
+.baseline-audio-actions{display:flex;align-items:center;justify-content:center;gap:clamp(12px,2vw,25px);flex-wrap:wrap}
+.baseline-audio-actions .text-button{min-height:44px;letter-spacing:.07em}
+@media(max-width:540px){.baseline-audio-actions{flex-direction:column}.baseline-audio-actions>*{max-width:100%;width:min(100%,280px)}}
