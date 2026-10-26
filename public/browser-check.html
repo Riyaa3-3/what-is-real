@@ -55,6 +55,13 @@ html,body{margin:0;min-height:100%;background:#edf4f7!important;color:#102536!im
  report('User Agent: '+navigator.userAgent);
  report('screen: '+screen.width+' x '+screen.height+' / DPR: '+window.devicePixelRatio);
  report('matchMedia: '+(typeof window.matchMedia));
+ if (typeof window.matchMedia === 'function') {
+   var mql=window.matchMedia('(prefers-reduced-motion: reduce)');
+   report('MediaQueryList.addEventListener: '+typeof mql.addEventListener);
+   report('MediaQueryList.addListener: '+typeof mql.addListener);
+ }
+ try { report('native URL constructor: '+new URL('./assets/',document.baseURI).href); }
+ catch(err) { report('native URL constructor FAILED: '+(err&&err.message||String(err))); }
  report('requestAnimationFrame: '+(typeof window.requestAnimationFrame));
  report('CSS overflow clip supported: '+(window.CSS&&CSS.supports?CSS.supports('overflow','clip'):'unknown'));
  document.getElementById('run-test').addEventListener('click',async function(){
