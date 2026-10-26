@@ -22,3 +22,9 @@ jobs:
         run: npm test
       - name: Build production assets
         run: npm run build
+      - name: Save deployable static build
+        uses: actions/upload-artifact@v4
+        with:
+          name: what-is-real-build
+          path: dist/
+          retention-days: 30
