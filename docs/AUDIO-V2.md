@@ -45,17 +45,37 @@ The pack is stored only in the current browser's IndexedDB. Nothing is uploaded
 from the user's device to GitHub or another server by the importer. Other
 visitors/devices must separately import the pack until the actual files are hosted.
 
-## Publish MP3s for everyone (optional final production step)
+## Publish all nine MP3s for every visitor — one ZIP upload
 
-A second chat artifact `WHAT_IS_REAL_V2_audio_for_GitHub.zip` contains the nine
-real MP3 files under `public/audio/background/` and `public/audio/baseline/`.
-Extract the ZIP and commit those same file paths to branch
-`feat/chapter-motion-audio-v2`. The player automatically resolves hosted assets
-when no local audio pack has been installed. Re-run the V2 preview deployment
-after committing them. This is required for a public website that plays audio
-without visitors importing the pack.
+The user confirmed authorization to make the provided audio publicly available.
+The nine converted MP3 files are bundled into one downloadable artifact named
+`WHAT_IS_REAL_V2_audio_for_GitHub.zip`.
 
-The user confirmed having the necessary permission to use the provided audio.
+**No extraction and no coding are required.**
+
+1. Download this exact ZIP from the ChatGPT conversation.
+2. Sign in to GitHub, open https://github.com/Riyaa3-3/what-is-real/upload/main .
+3. Choose **Choose your files**, select the entire original ZIP, and keep its filename unchanged.
+4. Check the destination is the repository root on `main`, not inside a subfolder.
+5. Click **Commit changes**. This push automatically triggers GitHub Pages publishing.
+6. In GitHub Actions, wait for the **Deploy WHAT IS REAL? to GitHub Pages** job to succeed.
+7. Visit https://riyaa3-3.github.io/what-is-real/ in a new private/incognito window.
+   The music and the eight film clips now resolve automatically from the public website.
+
+The release workflow executes `scripts/unpack_audio_bundle.py` **before**
+the Vite build. It checks the exact nine filenames and SHA-256 hashes of the
+approved MP3 contents, extracts only those tracks, and verifies they exist
+in the generated `dist/audio/` directory. An incorrect ZIP causes the
+deployment to fail rather than silently publishing broken media.
+
+Visitors no longer need the `.wiraudio` importer once the soundtrack ZIP
+has been uploaded and deployment succeeds. The importer stays available
+for local testing. Users with previously imported audio can continue using it
+on that browser.
+
+The background music is ON by default at 25% volume, separate from the 92%
+dialogue channel. The only unavoidable exception is browser autoplay policy:
+a visitor may need to click to begin audible playback.
 
 ## Runtime, accessibility, and verification
 
