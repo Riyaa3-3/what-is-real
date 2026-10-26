@@ -4,7 +4,7 @@
 
 The background soundtrack is `background/atmosphere-loop.mp3`, approximately 4m51s.
 Music starts ON by default, loops one track, and is not reset by page or chapter changes.
-Its volume defaults to 38%. Movie dialogue has a separate independent channel,
+Its volume defaults to 25% (quiet ambient mix, roughly one quarter of the slider). Movie dialogue has a separate independent channel,
 starts ON, and defaults to 92%. Playing film dialogue does **not** pause, fade,
 restart or lower the independent background music.
 
