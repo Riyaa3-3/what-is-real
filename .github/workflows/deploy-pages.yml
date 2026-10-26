@@ -29,20 +29,23 @@ jobs:
         run: npm ci
       - name: Verify narrative and audio mapping
         run: npm test
-      - name: Install owner-approved soundtrack from ZIP or original .wiraudio pack
-        run: python3 scripts/unpack_audio_bundle.py
+      - name: Require and install approved public soundtrack
+        run: |
+          if [ ! -f WHAT_IS_REAL_audio_pack.wiraudio ] && [ ! -f WHAT_IS_REAL_V2_audio_for_GitHub.zip ]; then
+            echo "::error::The public website must ship its nine approved audio tracks."
+            exit 1
+          fi
+          python3 scripts/unpack_audio_bundle.py
       - name: Build production website
         run: npm run build
-      - name: Verify all nine hosted MP3s when soundtrack bundle is supplied
+      - name: Verify all nine MP3 files in production build
         run: |
-          if [ -f WHAT_IS_REAL_V2_audio_for_GitHub.zip ] || [ -f WHAT_IS_REAL_audio_pack.wiraudio ]; then
-            test -s dist/audio/background/atmosphere-loop.mp3
-            for file in dist/audio/baseline/*.mp3; do test -s "$file"; done
-            test "$(find dist/audio/baseline -name '*.mp3' | wc -l)" -eq 8
-            echo "Background music + 8 baseline film recordings are in the published website."
-          else
-            echo "Soundtrack pack not yet uploaded: website still supports one-time browser audio import."
-          fi
+          test -s dist/audio/background/atmosphere-loop.mp3
+          for name in cells-01-institution cells-02-cell cells-03-duties interlinked-01-hold-hand interlinked-02-finger interlinked-03-heart interlinked-04-dream within-cells-interlinked; do
+            test -s "dist/audio/baseline/${name}.mp3"
+          done
+          test "$(find dist/audio/baseline -name '*.mp3' | wc -l)" -eq 8
+          echo "All nine production MP3s are included; no visitor import required."
       - name: Check GitHub Pages configuration
         uses: actions/configure-pages@v5
         with:
@@ -62,3 +65,37 @@ jobs:
       - name: Publish official website
         id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify all nine MP3 URLs are publicly accessible
+        env:
+          SITE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          for file in \
+            background/atmosphere-loop.mp3 \
+            baseline/cells-01-institution.mp3 \
+            baseline/cells-02-cell.mp3 \
+            baseline/cells-03-duties.mp3 \
+            baseline/interlinked-01-hold-hand.mp3 \
+            baseline/interlinked-02-finger.mp3 \
+            baseline/interlinked-03-heart.mp3 \
+            baseline/interlinked-04-dream.mp3 \
+            baseline/within-cells-interlinked.mp3; do
+            url="${SITE_URL%/}/audio/$file"
+            ok=0
+            for attempt in $(seq 1 12); do
+              code=$(curl -sS -L -I -o /dev/null -w '%{http_code}' --connect-timeout 12 --max-time 25 "$url" || true)
+              if [ "$code" = "200" ]; then
+                echo "Verified public HTTP 200: $file"
+                ok=1
+                break
+              fi
+              echo "Waiting for public asset ($code): $file"
+              sleep 4
+            done
+            if [ "$ok" -ne 1 ]; then
+              echo "::error::Visitor audio unavailable: $url"
+              exit 1
+            fi
+          done
+          echo "All nine public soundtrack URLs are accessible without login or uploads."
+
