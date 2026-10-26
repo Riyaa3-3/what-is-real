@@ -4,6 +4,7 @@ import {initialState, restoreState, advanceBaseline} from '../src/state.ts';
 import {SUBTITLE_COPY, subtitleText, subtitlesReady} from '../src/data/subtitles.ts';
 import {screens} from '../src/data/screens.ts';
 import {BACKGROUND_KEY, BASELINE_CLIPS, baselineClip, AUDIO_KEYS} from '../src/data/audioCueMap.ts';
+import {resolveHostedAudioUrl} from '../src/audio/hosted.ts';
 
 test('new sessions contain no invented visitor choices or subtitles', () => {
   const state = initialState();
@@ -111,4 +112,14 @@ test('nine licensed audio slots match the film baseline in the exact user-select
   assert.equal(baselineClip('05',4), null);
   assert.equal(baselineClip('08',0), null);
   assert.equal(baselineClip('04',-1), null);
+});
+
+test('public website resolves all nine audio files without any visitor import', () => {
+  for (const key of AUDIO_KEYS) {
+    const expected = 'https://riyaa3-3.github.io/what-is-real/audio/' + key;
+    assert.equal(resolveHostedAudioUrl(key, 'https://riyaa3-3.github.io/what-is-real/'), expected);
+    const nested = 'https://example.github.io/what-is-real/preview-v2/audio/' + key;
+    assert.equal(resolveHostedAudioUrl(key, 'https://example.github.io/what-is-real/preview-v2/'), nested);
+  }
+  assert.throws(() => resolveHostedAudioUrl('../private.mp3', 'https://example.com/'));
 });
