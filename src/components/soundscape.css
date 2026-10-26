@@ -28,3 +28,6 @@
 
 .audio-needs-import{border:1px solid #b9cbd66c;padding:3px 5px;color:#d4bd93;font-size:8px;letter-spacing:.08em;margin-left:2px}
 @media(max-width:680px){.audio-needs-import{font-size:7px;padding:2px 3px}}
+
+.audio-pack-export{display:block;margin-top:9px;width:100%;min-height:44px;padding:10px;border:1px solid #a1c9cf6c;color:#d0e9f0;background:#112c38;font:10px var(--font-mono,monospace);letter-spacing:.08em;cursor:pointer}
+.audio-pack-export:hover{background:#24485b}
