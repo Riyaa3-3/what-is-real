@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>WHAT IS REAL? — 浏览器兼容性检测</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#edf4f7!important;color:#102536!important;font:15px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+#test-panel{position:fixed!important;z-index:2147483647!important;top:0;left:0;right:0;bottom:0;background:#edf4f7!important;color:#102536!important;overflow:auto!important;padding:calc(18px + env(safe-area-inset-top)) 18px calc(36px + env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch}
+#test-panel .inner{max-width:640px;margin:auto}
+#test-panel h1{color:#102536!important;font-size:23px!important;margin:8px 0 6px!important}
+#test-panel p{color:#314758!important;margin:9px 0!important}
+#test-panel .result{padding:10px 12px;background:#fff!important;border:1px solid #d6e1e7;border-radius:9px;margin:10px 0;overflow-wrap:anywhere;color:#15364a!important}
+#test-panel .good{border-left:5px solid #2a9279}#test-panel .bad{border-left:5px solid #db6b69}
+#test-panel button{display:block;width:100%;margin:14px 0;padding:14px;background:#154a6c!important;color:white!important;border:0;border-radius:9px;font-size:16px;min-height:48px}
+#test-panel button:disabled{opacity:.5}
+#test-panel pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#172b39;color:#fff;border-radius:9px;padding:12px;font:12px/1.5 monospace;max-height:32vh;overflow-y:auto}
+#test-panel .small{font-size:12px;color:#4b697d!important}#root{min-height:20px}
+</style>
+</head>
+<body>
+<div id="test-panel">
+ <div class="inner">
+  <div class="small">WHAT IS REAL? / DIAGNOSTICS 01</div>
+  <h1>夸克浏览器兼容性检测</h1>
+  <p>这是独立检测页，不会修改你的选择或音频设置。<strong>如果看得见这些文字，说明静态网页渲染正常。</strong></p>
+  <div class="result good">① 静态 HTML 和 CSS：已显示</div>
+  <div class="result" id="js-status">② 普通 JavaScript：正在检查……</div>
+  <div class="result" id="module-status">③ JavaScript 模块：正在检查……</div>
+  <div class="result" id="runtime-status">④ 主网站程序：等待你点击下面的按钮</div>
+  <button id="run-test" type="button">检测网站主程序 ↗</button>
+  <p class="small">点按钮后等待约3秒，检查结果会显示在这里。请截图发回 ChatGPT，无需手动复制报错。</p>
+  <div class="small">浏览器信息与运行记录（仅保存在当前页面）</div>
+  <pre id="logs">静态页面已加载，等待 JavaScript 检测……</pre>
+ </div>
+</div>
+<div id="root"></div>
+<noscript><div style="position:fixed;inset:40% 5%;z-index:2147483647;background:#fff;color:#b00;padding:20px">JavaScript 被关闭或拦截。这可能是主网站黑屏的原因。</div></noscript>
+<script>
+(function(){
+ var logs=[];
+ var logNode=document.getElementById('logs');
+ function report(line){logs.push(String(line));if(logNode)logNode.textContent=logs.join('\n');}
+ window.__quarkDiagLog=report;
+ window.addEventListener('error',function(event){
+   report('ERROR: '+(event.message||'resource failure')+'; source='+((event.filename||event.target&&event.target.src)||'unknown')+'; line='+(event.lineno||''));
+ });
+ window.addEventListener('unhandledrejection',function(event){
+   report('PROMISE ERROR: '+(event.reason&&event.reason.message||String(event.reason)));
+ });
+ document.getElementById('js-status').textContent='② 普通 JavaScript：正常运行';
+ document.getElementById('js-status').className='result good';
+ report('JavaScript: OK');
+ report('User Agent: '+navigator.userAgent);
+ report('screen: '+screen.width+' x '+screen.height+' / DPR: '+window.devicePixelRatio);
+ report('matchMedia: '+(typeof window.matchMedia));
+ report('requestAnimationFrame: '+(typeof window.requestAnimationFrame));
+ report('CSS overflow clip supported: '+(window.CSS&&CSS.supports?CSS.supports('overflow','clip'):'unknown'));
+ document.getElementById('run-test').addEventListener('click',async function(){
+  var button=this;button.disabled=true;
+  var status=document.getElementById('runtime-status');
+  status.textContent='④ 主网站程序：检查中，请稍等……';
+  report('Fetching main site HTML...');
+  try{
+   var response=await fetch('./',{cache:'no-store'});
+   report('Homepage HTTP: '+response.status);
+   if(!response.ok)throw Error('Homepage HTTP '+response.status);
+   var html=await response.text();
+   var doc=new DOMParser().parseFromString(html,'text/html');
+   var moduleScript=doc.querySelector('script[type="module"][src]');
+   var styleLink=doc.querySelector('link[rel="stylesheet"][href]');
+   if(!moduleScript)throw Error('No module script in production HTML');
+   var moduleURL=new URL(moduleScript.getAttribute('src'),response.url).href;
+   report('JS bundle path: '+moduleURL);
+   var probe=await fetch(moduleURL,{method:'GET',cache:'no-store'});
+   report('JS bundle HTTP: '+probe.status+' / MIME: '+probe.headers.get('content-type'));
+   if(!probe.ok)throw Error('Main JS bundle HTTP '+probe.status);
+   if(styleLink){
+     var style=document.createElement('link');
+     style.rel='stylesheet';style.href=new URL(styleLink.getAttribute('href'),response.url).href;
+     document.head.appendChild(style);
+     report('Site CSS attached');
+   }
+   var script=document.createElement('script');
+   script.type='module';script.src=moduleURL;
+   script.onerror=function(){report('ERROR: Main module failed to load or parse');status.textContent='④ 主网站程序：加载失败（截图错误日志）';status.className='result bad';};
+   script.onload=function(){
+     report('Main module network load event received.');
+     setTimeout(function(){
+       var count=document.getElementById('root').childElementCount;
+       report('React #root childElementCount: '+count);
+       if(count){
+         status.textContent='④ React 主程序：已创建页面节点。如果原站仍黑屏，更可能是视觉图层渲染问题。';
+         status.className='result good';
+       } else {
+         status.textContent='④ React 主程序：未创建页面节点。请截图下面的报错，可能是脚本运行失败。';
+         status.className='result bad';
+       }
+     },1600);
+   };
+   document.head.appendChild(script);
+  }catch(error){
+   report('ERROR: '+(error&&error.stack||error));
+   status.textContent='④ 主网站程序：请求失败（查看下方日志）';
+   status.className='result bad';
+  }finally{setTimeout(function(){button.disabled=false;},3500);}
+ });
+}());
+</script>
+<script type="module">
+document.getElementById('module-status').textContent='③ JavaScript 模块：正常运行';
+document.getElementById('module-status').className='result good';
+window.__quarkDiagLog?.('ES module: OK');
+</script>
+</body></html>
