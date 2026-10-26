@@ -53,7 +53,7 @@ export function useExperienceAudio(screenId:string,chapter:string){
     if(fadeFrame.current!==null)cancelAnimationFrame(fadeFrame.current);
     halt(fading.current);
     const prior=active.current;fading.current=prior;
-    const next=new Audio(import.meta.env.BASE_URL+file.replace(/^\\//,''));
+    const next=new Audio(import.meta.env.BASE_URL+(file.startsWith('/') ? file.slice(1) : file));
     next.loop=true;next.volume=0;active.current={audio:next,path:id};
     void next.play().catch(()=>{});
     const begun=performance.now(),priorVolume=prior?.audio.volume??0;
@@ -83,7 +83,7 @@ export function useExperienceAudio(screenId:string,chapter:string){
     stopCues();
     const file=baselineAudio[key];
     if(file){
-      const sound=new Audio(import.meta.env.BASE_URL+file.replace(/^\\//,''));
+      const sound=new Audio(import.meta.env.BASE_URL+(file.startsWith('/') ? file.slice(1) : file));
       sound.volume=latest.current.volume;cues.current=[sound];
       sound.addEventListener('ended',()=>{cues.current=cues.current.filter(c=>c!==sound);},{once:true});
       void sound.play().catch(()=>{});
