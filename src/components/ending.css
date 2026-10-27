@@ -787,3 +787,104 @@
     scroll-behavior: auto;
   }
 }
+
+/* Credits-only project attribution — intentionally quiet, never a watermark. */
+.credits-attribution {
+  box-sizing: border-box;
+  width: min(100%, 760px);
+  margin: 72px auto 0;
+  padding: 34px 12px 0;
+  border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  color: inherit;
+  text-align: center;
+}
+.credits-attribution p {
+  margin: 0;
+}
+.credits-attribution-title {
+  font: 500 14px/1.7 var(--mono, monospace);
+  letter-spacing: .035em;
+}
+.credits-attribution-title span[lang] {
+  font-family: var(--sans, sans-serif);
+  letter-spacing: 0;
+}
+.credits-attribution-kind {
+  margin-top: 10px !important;
+  font: 13px/1.65 var(--sans, sans-serif);
+}
+.credits-attribution-role {
+  margin-top: 26px !important;
+  color: var(--muted, #8fa6b4);
+  font: 12px/1.7 var(--mono, monospace);
+  letter-spacing: .015em;
+}
+.credits-attribution-author {
+  margin-top: 8px !important;
+  font: 500 15px/1.7 var(--mono, monospace);
+  letter-spacing: .035em;
+}
+.credits-attribution-development {
+  margin-top: 20px !important;
+  color: var(--muted, #8fa6b4);
+  font: 12px/1.7 var(--mono, monospace);
+}
+.credits-attribution-links {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  margin-top: 27px;
+  font: 12px/1.8 var(--mono, monospace);
+}
+.credits-attribution-links > div {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.credits-attribution-links span {
+  color: var(--muted, #8fa6b4);
+  margin-right: 8px;
+}
+.credits-attribution-links a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 4px;
+  overflow-wrap: anywhere;
+}
+.credits-attribution-links a:hover {
+  text-decoration-color: currentColor;
+}
+.credits-attribution-links a:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+}
+@media (max-width: 700px) {
+  .credits-attribution {
+    margin-top: 58px;
+    padding: 27px 4px 0;
+  }
+  .credits-attribution-title {
+    font-size: 13px;
+  }
+  .credits-attribution-kind {
+    font-size: 13px;
+  }
+  .credits-attribution-role,
+  .credits-attribution-development {
+    font-size: 12px;
+  }
+  .credits-attribution-links {
+    gap: 14px;
+    font-size: 12px;
+  }
+  .credits-attribution-links span {
+    display: block;
+    margin-right: 0;
+  }
+  .credits-attribution-links a {
+    display: inline-block;
+    max-width: 100%;
+    padding: 3px 0;
+  }
+}
