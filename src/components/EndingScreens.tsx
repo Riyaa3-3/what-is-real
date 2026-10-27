@@ -302,6 +302,17 @@ function Credits({
       <Action secondary onClick={() => dialog.current?.showModal()}><Bilingual en="REFERENCES" zh="文献来源" /></Action>
       <Action secondary onClick={restart}><Bilingual en="RESTART" zh="重新开始" /></Action>
     </div>
+    <section className="credits-attribution" aria-label="Project attribution">
+      <div className="credits-attribution-title">WHAT IS REAL? <span aria-hidden="true">/</span> <span lang="zh-CN">何以为“真”？</span></div>
+      <p className="credits-attribution-kind">An Independent Interactive Research Project</p>
+      <p className="credits-attribution-role">Concept, Research, Translation Analysis &amp; Interactive Script</p>
+      <p className="credits-attribution-author">Riya <span aria-hidden="true">|</span> 2026</p>
+      <p className="credits-attribution-development">AI-assisted Development</p>
+      <div className="credits-attribution-links">
+        <div><span>Original Project:</span><a href="https://riyaa3-3.github.io/what-is-real/" target="_blank" rel="noopener noreferrer">https://riyaa3-3.github.io/what-is-real/</a></div>
+        <div><span>Source Repository:</span><a href="https://github.com/Riyaa3-3/what-is-real" target="_blank" rel="noopener noreferrer">https://github.com/Riyaa3-3/what-is-real</a></div>
+      </div>
+    </section>
     <dialog ref={dialog} className="ending-dialog references-dialog" aria-labelledby="references-title" onClick={event => {
       if (event.target === event.currentTarget) dialog.current?.close();
     }}>
